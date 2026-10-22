@@ -38,6 +38,8 @@ jobs:
           base=https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0
           curl -fsSL -o voz.onnx "$base/${{ matrix.ruta }}.onnx"
           curl -fsSL -o voz.onnx.json "$base/${{ matrix.ruta }}.onnx.json"
+          # Algunas voces viejas traen "PhonemeType.ESPEAK" en lugar de "espeak".
+          sed -i 's/"PhonemeType\.ESPEAK"/"espeak"/' voz.onnx.json
 
       - name: Narrar
         run: |
