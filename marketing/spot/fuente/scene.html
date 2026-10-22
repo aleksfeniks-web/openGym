@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Reset Gym · spot 9:16</title>
+<style>
+@font-face { font-family: Barlow; font-weight: 400; src: url(fonts/Barlow-Regular.ttf); }
+@font-face { font-family: Barlow; font-weight: 600; src: url(fonts/Barlow-SemiBold.ttf); }
+@font-face { font-family: Barlow; font-weight: 700; src: url(fonts/Barlow-Bold.ttf); }
+@font-face { font-family: Barlow; font-weight: 800; font-style: italic; src: url(fonts/Barlow-ExtraBoldItalic.ttf); }
+@font-face { font-family: BarlowC; font-weight: 900; src: url(fonts/BarlowCondensed-Black.ttf); }
+@font-face { font-family: BarlowC; font-weight: 800; font-style: italic; src: url(fonts/BarlowCondensed-ExtraBoldItalic.ttf); }
+
+:root { --lime: #8ee000; --cyan: #1eb8f0; --ink: #f4f5f2; --dim: #9ea39a; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0c0d0c; }
+#stage { position: absolute; inset: 0; perspective: 2200px; perspective-origin: 50% 46%; overflow: hidden;
+  background: radial-gradient(120% 70% at 50% 45%, #1a1d19 0%, #0f110f 55%, #090a09 100%); font-family: Barlow, sans-serif; color: var(--ink); }
+.blob { position: absolute; border-radius: 50%; will-change: transform, opacity; }
+#blobA { width: 980px; height: 980px; background: radial-gradient(circle, rgba(142,224,0,.95) 0%, rgba(142,224,0,.55) 35%, rgba(142,224,0,0) 70%); filter: blur(60px); }
+#blobB { width: 640px; height: 640px; background: radial-gradient(circle, rgba(30,184,240,.8) 0%, rgba(30,184,240,0) 70%); filter: blur(70px); }
+#vignette { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 48%, transparent 55%, rgba(0,0,0,.72) 100%); pointer-events: none; }
+#grain { position: absolute; inset: 0; opacity: .07; mix-blend-mode: overlay; pointer-events: none; }
+
+/* teléfono */
+.phone { position: absolute; left: 50%; top: 50%; width: 500px; height: 1060px; margin: -530px 0 0 -250px;
+  transform-style: preserve-3d; will-change: transform, opacity, filter; }
+.phone .body { position: absolute; inset: 0; border-radius: 82px; background: linear-gradient(145deg, #2b2e2b, #0c0d0c 40%, #1b1d1b);
+  box-shadow: 0 60px 120px rgba(0,0,0,.65), 0 0 0 2px rgba(255,255,255,.08), inset 0 0 0 3px rgba(255,255,255,.06); }
+.phone .screen { position: absolute; inset: 14px; border-radius: 68px; overflow: hidden; background: #000; }
+.phone .screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.phone .island { position: absolute; top: 30px; left: 50%; width: 150px; height: 42px; margin-left: -75px; border-radius: 22px; background: #000; z-index: 3; }
+.phone .gloss { position: absolute; inset: 14px; border-radius: 68px; z-index: 4; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 70%, rgba(255,255,255,.05) 100%); }
+
+/* texto cinético */
+.line { position: absolute; left: 0; right: 0; text-align: center; white-space: nowrap; font-weight: 600; letter-spacing: -.01em; }
+.w { display: inline-block; will-change: transform, opacity, filter; margin: 0 .12em; }
+.acc { font-weight: 800; font-style: italic; background: linear-gradient(100deg, var(--cyan), var(--lime) 60%); -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0 .06em; }
+.under { position: relative; }
+.under::after { content: ""; position: absolute; left: 4%; right: 4%; bottom: -.04em; height: .07em; border-radius: 1em; background: var(--lime); transform-origin: left; transform: scaleX(var(--u, 0)); }
+
+/* tarjetas flotantes */
+.card { position: absolute; border-radius: 30px; background: rgba(22,24,22,.82); border: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 30px 70px rgba(0,0,0,.55); backdrop-filter: blur(12px); padding: 26px 30px; will-change: transform, opacity, filter; }
+.k { font: 600 24px Barlow; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.big { font: 900 76px/1 BarlowC; color: var(--ink); }
+.lime { color: var(--lime); }
+.chip { display: inline-flex; align-items: center; gap: 12px; border-radius: 999px; padding: 14px 26px; font: 700 30px Barlow; background: rgba(142,224,0,.14); color: var(--lime); border: 1px solid rgba(142,224,0,.35); }
+.sw { position: absolute; width: 96px; height: 96px; border-radius: 50%; box-shadow: 0 20px 40px rgba(0,0,0,.5); will-change: transform, opacity; }
+.aa { position: absolute; width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font: 800 italic 44px Barlow; color: #111; background: #f4f5f2; box-shadow: 0 20px 40px rgba(0,0,0,.5); }
+
+/* pantalla bloqueada */
+#lock { position: absolute; inset: 0; background: radial-gradient(120% 80% at 30% 20%, #1d2a12, #070807 70%); }
+#lock .time { position: absolute; top: 150px; left: 0; right: 0; text-align: center; font: 600 150px/1 Barlow; color: #f2f2f2; letter-spacing: -.02em; }
+#lock .date { position: absolute; top: 120px; left: 0; right: 0; text-align: center; font: 600 30px Barlow; color: rgba(255,255,255,.7); }
+.notif { position: absolute; left: 50%; width: 760px; margin-left: -380px; border-radius: 40px; padding: 26px 30px; display: flex; gap: 24px; align-items: center;
+  background: rgba(40,42,40,.78); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(18px); box-shadow: 0 40px 90px rgba(0,0,0,.6); will-change: transform, opacity; }
+.notif img { width: 96px; height: 96px; border-radius: 24px; background: #0a0a0a; }
+.notif .t { font: 700 30px Barlow; color: #fff; }
+.notif .s { font: 400 30px Barlow; color: rgba(255,255,255,.82); margin-top: 4px; }
+.notif .app { font: 600 24px Barlow; color: rgba(255,255,255,.55); display: flex; justify-content: space-between; margin-bottom: 4px; }
+.bars { position: absolute; display: flex; gap: 12px; align-items: center; height: 160px; }
+.bars i { display: block; width: 12px; border-radius: 6px; background: var(--lime); }
+
+/* admin */
+#admin { width: 760px; left: 50%; margin-left: -380px; padding: 36px 38px; }
+#admin .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
+#admin .cell { background: rgba(255,255,255,.04); border-radius: 22px; padding: 20px 22px; }
+#admin .cell .n { font: 900 72px/1 BarlowC; margin-top: 6px; }
+#admin .row { display: flex; align-items: center; gap: 18px; padding: 16px 0; border-top: 1px solid rgba(255,255,255,.07); font: 600 32px Barlow; }
+#admin .av { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font: 700 26px Barlow; color: #0b0b0b; }
+#admin .row .meta { margin-left: auto; font: 400 26px Barlow; color: var(--dim); }
+.pill { font: 700 24px Barlow; padding: 6px 16px; border-radius: 999px; background: rgba(142,224,0,.16); color: var(--lime); }
+
+/* cierre */
+#endLogo { position: absolute; left: 50%; top: 600px; width: 360px; height: 360px; margin-left: -180px; will-change: transform, opacity, filter; }
+#endWord { position: absolute; left: 0; right: 0; top: 990px; text-align: center; font: 800 italic 210px/1 BarlowC; letter-spacing: -.01em;
+  background: linear-gradient(100deg, var(--cyan), var(--lime) 65%); -webkit-background-clip: text; background-clip: text; color: transparent; will-change: transform, opacity, filter; }
+#endTag { position: absolute; left: 0; right: 0; top: 1230px; text-align: center; font: 600 30px Barlow; letter-spacing: .42em; color: #c9ccc5; }
+#endCta { position: absolute; left: 50%; top: 1360px; width: 620px; margin-left: -310px; height: 124px; border-radius: 62px; display: grid; place-items: center;
+  font: 900 70px BarlowC; color: #070707; background: linear-gradient(100deg, var(--cyan), var(--lime) 70%); box-shadow: 0 20px 60px rgba(142,224,0,.35); }
+#endHandles { position: absolute; left: 0; right: 0; top: 1540px; text-align: center; font: 600 36px Barlow; color: #fff; }
+#madeBy { position: absolute; left: 0; right: 0; top: 1690px; text-align: center; }
+#madeBy .m { font: 600 22px Barlow; letter-spacing: .5em; color: rgba(255,255,255,.55); }
+#madeBy .r { font: 700 40px Barlow; color: #f1f1f1; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="blobA" class="blob"></div>
+  <div id="blobB" class="blob"></div>
+
+  <!-- teléfono principal -->
+  <div id="phone" class="phone">
+    <div class="body"></div>
+    <div class="screen">
+      <img id="s_login" src="img/login.jpg">
+      <img id="s_home" src="img/home.jpg">
+      <img id="s_workout" src="img/workout.jpg">
+      <img id="s_stats" src="img/stats.jpg">
+      <div id="lock">
+        <div class="date">jueves, 22 de octubre</div>
+        <div class="time">7:00</div>
+      </div>
+      <div id="s_black" style="position:absolute;inset:0;background:#050505"></div>
+    </div>
+    <div class="island"></div>
+    <div class="gloss"></div>
+  </div>
+
+  <!-- tarjetas -->
+  <div id="sw1" class="sw" style="background:#8ee000"></div>
+  <div id="sw2" class="sw" style="background:#1eb8f0"></div>
+  <div id="sw3" class="sw" style="background:#f4f5f2"></div>
+  <div id="sw4" class="aa">Aa</div>
+  <div id="logoChip" class="card" style="padding:18px 26px;display:flex;align-items:center;gap:16px">
+    <img src="img/mark.png" style="width:80px;height:80px"><div><div class="k" style="letter-spacing:.1em">Tu logo</div><div style="font:800 italic 40px Barlow">Tu gimnasio</div></div>
+  </div>
+
+  <div id="setCard" class="card" style="width:600px">
+    <div class="k">Serie 1 · Sentadilla</div>
+    <div style="display:flex;align-items:baseline;gap:18px;margin-top:10px"><span class="big">92.5</span><span style="font:600 34px Barlow;color:var(--dim)">kg</span><span class="big" style="margin-left:18px">×8</span>
+      <span style="margin-left:auto;width:64px;height:64px;border-radius:50%;background:var(--lime);display:grid;place-items:center;font:900 40px Barlow;color:#0b0b0b">✓</span></div>
+  </div>
+  <div id="progCard" class="card"><span class="chip">↑ Progresión · +5 kg la próxima</span></div>
+  <div id="restCard" class="card" style="display:flex;align-items:center;gap:22px">
+    <svg width="96" height="96" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,.12)" stroke-width="9" fill="none"/><circle id="ring" cx="50" cy="50" r="42" stroke="#8ee000" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="0" transform="rotate(-90 50 50)"/></svg>
+    <div><div class="k">Descanso</div><div class="big" id="restTxt" style="font-size:66px">1:30</div></div>
+  </div>
+
+  <div id="streakCard" class="card"><div class="k">Racha</div><div class="big">13 <span style="font-size:44px;color:var(--dim)">semanas</span></div></div>
+  <div id="weightCard" class="card"><div class="k">Peso · 30 días</div><div class="big lime">−1,2 kg</div></div>
+  <div id="prCard" class="card"><span class="chip">★ Nuevo récord · 87.5 kg</span></div>
+
+  <div id="admin" class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between"><div style="font:900 64px BarlowC">PANEL DE ADMIN</div><span class="pill">Tu gimnasio</span></div>
+    <div class="grid">
+      <div class="cell"><div class="k">Socios</div><div class="n" id="nSocios">0</div></div>
+      <div class="cell"><div class="k">Activos 7 días</div><div class="n lime" id="nActivos">0</div></div>
+    </div>
+    <div style="margin-top:24px">
+      <div class="row"><div class="av" style="background:#8ee000">AN</div>Ana<div class="meta">entrenó hoy</div></div>
+      <div class="row"><div class="av" style="background:#1eb8f0">LU</div>Luis<div class="meta">entrenó hoy</div></div>
+      <div class="row"><div class="av" style="background:#f4f5f2">SO</div>Sofía<div class="meta">hace 2 días</div></div>
+      <div class="row" style="border-bottom:1px solid rgba(255,255,255,.07)"><div class="av" style="background:#c9ccc5">+</div>Nuevo socio<div class="meta lime">código de invitación</div></div>
+    </div>
+  </div>
+
+  <div id="notif" class="notif" style="top:760px">
+    <img src="img/mark.png">
+    <div style="flex:1"><div class="app"><span>RESET GYM</span><span>ahora</span></div><div class="t">Hoy toca Leg Day</div><div class="s">Tu entrenamiento está listo. ¡A darle!</div></div>
+  </div>
+  <div id="barsL" class="bars" style="left:60px;top:930px"></div>
+  <div id="barsR" class="bars" style="right:60px;top:930px"></div>
+
+  <!-- texto -->
+  <div id="text" style="position:absolute;inset:0"></div>
+
+  <!-- cierre -->
+  <img id="endLogo" src="img/mark.png">
+  <div id="endWord">RESET GYM</div>
+  <div id="endTag">PROFESSIONAL ★ GYM CARE</div>
+  <div id="endCta">PIDE TU DEMO</div>
+  <div id="endHandles">resetsupplymx.com &nbsp;·&nbsp; @ResetsupplyMx</div>
+  <div id="madeBy"><div class="m">UNA SOLUCIÓN DE</div><div class="r">Reset Supply</div></div>
+
+  <div id="vignette"></div>
+  <canvas id="grain" width="540" height="960"></canvas>
+  <div id="flash" style="position:absolute;inset:0;background:#e9ffd0;opacity:0;pointer-events:none"></div>
+</div>
+
+<script>
+// ---------- utilidades
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const E = {
+  out: x => 1 - Math.pow(1 - x, 3),
+  inOut: x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2,
+  back: x => { const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); },
+  expo: x => x === 1 ? 1 : 1 - Math.pow(2, -10 * x),
+  lin: x => x,
+};
+// keyframes: [[t, v], ...] con easing por tramo (inOut por defecto)
+function kf(t, keys, ease = E.inOut) {
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 0; i < keys.length - 1; i++) {
+    const [t0, v0] = keys[i], [t1, v1, e] = keys[i + 1];
+    if (t <= t1) { const u = (e || ease)((t - t0) / (t1 - t0)); return Array.isArray(v0) ? v0.map((a, j) => a + (v1[j] - a) * u) : v0 + (v1 - v0) * u; }
+  }
+  return keys[keys.length - 1][1];
+}
+const win = (t, a, b, fi = .35, fo = .35) => clamp((t - a) / fi) * clamp((b - t) / fo);
+
+// ---------- grano estático
+(() => { const c = $('grain'), x = c.getContext('2d'), d = x.createImageData(c.width, c.height);
+  for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } x.putImageData(d, 0, 0); })();
+
+// ---------- barras de sonido
+for (const id of ['barsL', 'barsR']) for (let i = 0; i < 9; i++) $(id).appendChild(document.createElement('i'));
+
+// ---------- guion: líneas de texto (tiempo de entrada por palabra)
+// [inicio, fin, y, tamaño, [[palabra, t, acento?, subrayado?], ...]]
+const LINES = [
+  [0.25, 2.95, 1530, 96, [['¿tienes', 0.35], ['un', 0.62], ['gimnasio?', 0.95, 1, 1]]],
+  [3.15, 7.05, 260, 88, [['dale', 3.3], ['a', 3.48], ['tus', 3.6], ['socios', 3.8]]],
+  [3.15, 7.05, 372, 104, [['su', 4.25], ['propia', 4.45, 1], ['app', 4.7, 1]]],
+  [7.35, 11.05, 1500, 92, [['con', 7.5], ['tu', 7.7]]],
+  [7.35, 11.05, 1616, 132, [['marca', 8.0, 1, 1]]],
+  [11.35, 15.45, 240, 92, [['entrenan', 11.5], ['guiados', 11.85, 1]]],
+  [11.35, 15.45, 345, 56, [['serie', 12.4], ['por', 12.55], ['serie', 12.7]]],
+  [15.75, 19.65, 240, 92, [['y', 15.9], ['ven', 16.05], ['su', 16.2]]],
+  [15.75, 19.65, 350, 120, [['progreso', 16.45, 1, 1]]],
+  [19.95, 23.85, 250, 92, [['y', 20.1], ['tú', 20.25], ['lo', 20.4]]],
+  [19.95, 23.85, 360, 116, [['controlas', 20.65, 1], ['todo', 21.0, 1]]],
+  [24.1, 27.9, 1540, 80, [['recordatorios', 24.3]]],
+  [24.1, 27.9, 1640, 96, [['para', 24.65], ['entrenar', 24.9, 1, 1]]],
+];
+const textRoot = $('text');
+const lineEls = LINES.map(([a, b, y, size, words]) => {
+  const d = document.createElement('div'); d.className = 'line'; d.style.top = y + 'px'; d.style.fontSize = size + 'px';
+  const ws = words.map(([w, t, acc, und]) => { const s = document.createElement('span'); s.className = 'w' + (acc ? ' acc' : '') + (und ? ' under' : ''); s.textContent = w; d.appendChild(s); return { s, t, und }; });
+  textRoot.appendChild(d); return { d, a, b, ws };
+});
+
+// ---------- render(t): pone todo en su sitio para el instante t (segundos)
+const TOTAL = 33.0;
+function render(t) {
+  // fondo: el resplandor respira y se mueve con cada escena
+  const bx = kf(t, [[0, 540], [3, 560], [7.2, 380], [11.2, 700], [15.6, 420], [19.8, 620], [24, 540], [28, 540], [33, 540]]);
+  const by = kf(t, [[0, 1150], [3, 900], [7.2, 1000], [11.2, 980], [15.6, 1050], [19.8, 1000], [24, 900], [28, 780], [33, 780]]);
+  const bs = kf(t, [[0, .2], [1.6, .9, E.out], [3, 1], [28, 1], [28.6, 1.5], [33, 1.35]]) * (1 + .03 * Math.sin(t * 2.1));
+  const bo = kf(t, [[0, 0], [1, .85], [27.6, .85], [28.1, 1], [33, .9]]);
+  $('blobA').style.transform = `translate(${bx - 490}px, ${by - 490}px) scale(${bs})`; $('blobA').style.opacity = bo;
+  $('blobB').style.transform = `translate(${1080 - bx - 320 + 120 * Math.sin(t * .5)}px, ${by - 520 + 90 * Math.cos(t * .4)}px)`; $('blobB').style.opacity = kf(t, [[0, 0], [3, .35], [27, .4], [28.5, .6], [33, .5]]);
+
+  // teléfono: pose 3D por escena
+  const P = [ // t, x, y, z, rotX, rotY, rotZ, scale
+    [0.0, 0, 900, -400, 30, 0, 0, .85],
+    [1.4, 0, 160, -200, 18, -12, 4, .9],
+    [2.9, 0, 120, -100, 10, -20, 6, .92],
+    [3.25, -60, 230, 0, 6, 22, -4, 1, E.expo],
+    [7.0, 0, 210, 60, 2, 10, -2, 1],
+    [7.45, 140, -120, 120, 48, -18, 26, .95, E.expo],
+    [11.0, 110, -150, 140, 44, -24, 22, .95],
+    [11.5, 150, 260, 0, 6, -24, 5, .92, E.expo],
+    [15.4, 120, 250, 40, 2, -16, 3, .92],
+    [15.9, -170, 170, 0, 6, 24, -5, .9, E.expo],
+    [19.6, -150, 150, 40, 2, 16, -3, .9],
+    [20.1, -360, 420, -300, 10, 30, -8, .7, E.expo],
+    [23.8, -340, 420, -280, 8, 26, -6, .7],
+    [24.25, 0, 40, 0, 4, 0, 0, 1, E.expo],
+    [27.5, 0, 20, 60, 2, -6, 1, 1.02],
+    [28.1, 0, -200, 900, 0, 0, 0, 1.5, E.expo],
+  ];
+  const p = kf(t, P.map(r => [r[0], r.slice(1, 8), r[8]]));
+  const shake = t > 24.8 && t < 25.3 ? Math.sin(t * 90) * 4 * (25.3 - t) : 0;
+  const ph = $('phone');
+  ph.style.transform = `translate3d(${p[0] + shake}px, ${p[1]}px, ${p[2]}px) rotateX(${p[3]}deg) rotateY(${p[4]}deg) rotateZ(${p[5]}deg) scale(${p[6]})`;
+  ph.style.opacity = kf(t, [[0, 0], [.6, 1], [27.9, 1], [28.25, 0]]);
+  const blurP = t > 20 && t < 23.9 ? 6 : 0;
+  ph.style.filter = `blur(${kf(t, [[0, 12], [1.2, 0], [19.9, 0], [20.3, blurP], [23.7, blurP], [24.2, 0], [27.9, 0], [28.2, 14]])}px)`;
+
+  // pantallas (fundidos cortos en los cambios)
+  const scr = { s_black: [-1, 3.2], s_login: [3.15, 7.3], s_home: [7.25, 11.4], s_workout: [11.35, 15.8], s_stats: [15.75, 24.2], lock: [24.15, 40] };
+  for (const [id, [a, b]] of Object.entries(scr)) $(id).style.opacity = clamp((t - a) / .15) * clamp((b - t) / .15) || (id === 's_black' && t < 3.2 ? 1 : 0);
+  $('s_black').style.opacity = t < 3.2 ? 1 - clamp((t - 3.05) / .15) : 0;
+
+  // texto cinético
+  for (const L of lineEls) {
+    const vis = t >= L.a - .01 && t <= L.b + .4;
+    L.d.style.display = vis ? 'block' : 'none'; if (!vis) continue;
+    const out = clamp((L.b - t) / .3 + 1) ; // >1 antes del final
+    const fade = clamp((L.b + .3 - t) / .3);
+    for (const w of L.ws) {
+      const u = clamp((t - w.t) / .45);
+      const e = E.back(u);
+      w.s.style.opacity = clamp(u * 2.2) * fade;
+      w.s.style.transform = `translateY(${(1 - e) * 60 - (1 - fade) * 30}px) scale(${.86 + .14 * e})`;
+      w.s.style.filter = `blur(${(1 - E.out(u)) * 14 + (1 - fade) * 10}px)`;
+      if (w.und) w.s.style.setProperty('--u', E.out(clamp((t - w.t - .35) / .5)));
+    }
+  }
+
+  // escena 3: colores de marca + logo
+  const swin = win(t, 8.2, 11.0, .4, .3);
+  [['sw1', 8.25, 760, 860], ['sw2', 8.4, 880, 960], ['sw3', 8.55, 760, 1060], ['sw4', 8.7, 880, 1160]].forEach(([id, ts, x, y]) => {
+    const u = E.back(clamp((t - ts) / .5));
+    $(id).style.opacity = clamp((t - ts) / .2) * swin;
+    $(id).style.transform = `translate(${x - 48}px, ${y - 48 + 6 * Math.sin(t * 2 + x)}px) scale(${u})`;
+  });
+  const lc = E.back(clamp((t - 8.9) / .55));
+  $('logoChip').style.opacity = clamp((t - 8.9) / .25) * swin;
+  $('logoChip').style.transform = `translate(${70}px, ${1180 + (1 - lc) * 80}px) rotate(${-4 + 4 * lc}deg)`;
+
+  // escena 4: serie, progresión, descanso
+  const wwin = win(t, 12.0, 15.45, .3, .3);
+  const card = (id, ts, x, y, rot = 0, depth = 0) => {
+    const u = E.back(clamp((t - ts) / .55)), w = wwin;
+    $(id).style.opacity = clamp((t - ts) / .2) * w;
+    $(id).style.transform = `translate(${x + (1 - u) * -120}px, ${y + 8 * Math.sin(t * 1.7 + x)}px) rotate(${rot}deg) scale(${.8 + .2 * u})`;
+    $(id).style.filter = depth ? `blur(${depth}px)` : 'none';
+  };
+  card('setCard', 12.2, 60, 1290, -3);
+  card('progCard', 12.75, 120, 1505, 2);
+  card('restCard', 13.3, 90, 1650, -2);
+  const rest = clamp((t - 13.4) / 2.0);
+  $('ring').setAttribute('stroke-dashoffset', 264 * rest * .33);
+  $('restTxt').textContent = '1:' + String(Math.max(0, 30 - Math.floor(rest * 20))).padStart(2, '0');
+
+  // escena 5: progreso
+  const swin5 = win(t, 16.6, 19.65, .3, .3);
+  [['streakCard', 16.7, 600, 1240, 4], ['weightCard', 17.15, 560, 1460, -3], ['prCard', 17.6, 440, 1690, 2]].forEach(([id, ts, x, y, r]) => {
+    const u = E.back(clamp((t - ts) / .55));
+    $(id).style.opacity = clamp((t - ts) / .2) * swin5;
+    $(id).style.transform = `translate(${x + (1 - u) * 140}px, ${y + 8 * Math.sin(t * 1.6 + y)}px) rotate(${r}deg) scale(${.8 + .2 * u})`;
+  });
+
+  // escena 6: panel de admin
+  const au = E.expo(clamp((t - 20.4) / .7));
+  $('admin').style.top = '600px';
+  $('admin').style.opacity = clamp((t - 20.35) / .25) * win(t, 20.3, 23.85, .1, .35);
+  $('admin').style.transform = `translateY(${(1 - au) * 260}px) rotateX(${(1 - au) * 25}deg) scale(${.9 + .1 * au})`;
+  const cnt = E.out(clamp((t - 20.9) / 1.4));
+  $('nSocios').textContent = Math.round(124 * cnt); $('nActivos').textContent = Math.round(87 * cnt);
+  [...$('admin').querySelectorAll('.row')].forEach((r, i) => { const u = E.out(clamp((t - 21.4 - i * .22) / .4)); r.style.opacity = u; r.style.transform = `translateX(${(1 - u) * 40}px)`; });
+
+  // escena 7: notificación + ondas
+  const nu = E.back(clamp((t - 24.85) / .5));
+  $('notif').style.opacity = clamp((t - 24.85) / .15) * win(t, 24.8, 27.9, .1, .3);
+  $('notif').style.transform = `translateY(${(1 - nu) * -140}px) scale(${.92 + .08 * nu})`;
+  const bw = win(t, 24.9, 27.6, .2, .4);
+  for (const id of ['barsL', 'barsR']) [...$(id).children].forEach((b, i) => {
+    const k = id === 'barsL' ? 8 - i : i;
+    const h = 24 + 120 * Math.abs(Math.sin(t * 7 + k * .7)) * Math.exp(-k * .18) * bw;
+    b.style.height = h + 'px'; b.style.opacity = bw;
+  });
+
+  // cierre
+  const L0 = 28.05;
+  const lu = E.back(clamp((t - L0) / .7));
+  $('endLogo').style.opacity = clamp((t - L0) / .3);
+  $('endLogo').style.transform = `scale(${.4 + .6 * lu}) rotate(${(1 - lu) * -12}deg)`;
+  $('endLogo').style.filter = `drop-shadow(0 0 ${40 + 30 * Math.sin(t * 3)}px rgba(142,224,0,.55)) blur(${(1 - E.out(clamp((t - L0) / .5))) * 16}px)`;
+  const wu = E.out(clamp((t - L0 - .35) / .6));
+  $('endWord').style.opacity = wu; $('endWord').style.transform = `translateY(${(1 - wu) * 60}px) scale(${.9 + .1 * wu})`; $('endWord').style.filter = `blur(${(1 - wu) * 18}px)`;
+  const tu = E.out(clamp((t - L0 - .75) / .5)); $('endTag').style.opacity = tu; $('endTag').style.letterSpacing = (.8 - .38 * tu) + 'em';
+  const cu = E.back(clamp((t - L0 - 1.1) / .55)); $('endCta').style.opacity = clamp((t - L0 - 1.1) / .2); $('endCta').style.transform = `scale(${.7 + .3 * cu})`;
+  const hu = E.out(clamp((t - L0 - 1.45) / .5)); $('endHandles').style.opacity = hu; $('endHandles').style.transform = `translateY(${(1 - hu) * 30}px)`;
+  const mu = E.out(clamp((t - L0 - 2.2) / .6)); $('madeBy').style.opacity = mu;
+  // destello en el golpe del logo
+  $('flash').style.opacity = kf(t, [[L0 - .05, 0], [L0, .35, E.lin], [L0 + .35, 0]]);
+  // fundido final
+  $('stage').style.filter = `brightness(${kf(t, [[0, 0], [.4, 1], [TOTAL - .5, 1], [TOTAL, 0]])})`;
+}
+window.render = render; window.TOTAL = TOTAL;
+render(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+[
+  {"t": 0.30, "max": 2.6, "texto": "¿Tienes un gimnasio?"},
+  {"t": 3.30, "max": 3.8, "texto": "Dale a tus socios su propia app..."},
+  {"t": 7.45, "max": 3.5, "texto": "con tu marca."},
+  {"t": 11.50, "max": 3.9, "texto": "Entrenan guiados, serie por serie."},
+  {"t": 15.90, "max": 3.7, "texto": "Y ven su progreso."},
+  {"t": 20.10, "max": 3.7, "texto": "Y tú lo controlas todo, desde tu panel."},
+  {"t": 24.30, "max": 3.4, "texto": "Con recordatorios para entrenar."},
+  {"t": 28.40, "max": 4.2, "texto": "Reset Gym. Pide tu demo."}
+]

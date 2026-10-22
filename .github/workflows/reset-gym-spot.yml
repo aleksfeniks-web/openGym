@@ -1,0 +1,96 @@
+# Reset Gym — spot 9:16: une la animación, la música/efectos y la voz, y lo publica en el Release "spot".
+# Voces: Piper (gratis, siempre) y ElevenLabs (si están ELEVENLABS_API_KEY y ELEVENLABS_VOICE_ID).
+
+name: Reset Gym spot
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['marketing/spot/**', '.github/workflows/reset-gym-spot.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  spot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        voz: [mujer, hombre, elevenlabs]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Herramientas
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          pip install -q piper-tts==1.8.0
+
+      - name: Voz
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
+          ELEVENLABS_MODEL: ${{ vars.ELEVENLABS_MODEL }}
+        run: |
+          set -eu
+          base=https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0
+          case "${{ matrix.voz }}" in
+            mujer)  ruta=es/es_MX/claude/high/es_MX-claude-high ;;
+            hombre) ruta=es/es_MX/ald/medium/es_MX-ald-medium ;;
+            elevenlabs)
+              if [ -z "${ELEVENLABS_API_KEY:-}" ] || [ -z "${ELEVENLABS_VOICE_ID:-}" ]; then
+                echo "::notice::Sin ELEVENLABS_API_KEY / ELEVENLABS_VOICE_ID: no se hace la versión ElevenLabs."; echo "skip=1" >> "$GITHUB_ENV"; exit 0
+              fi
+              python marketing/spot/narrar.py elevenlabs 2> err.txt || { tail -5 err.txt | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
+              exit 0 ;;
+          esac
+          curl -fsSL -o voz.onnx "$base/$ruta.onnx"
+          curl -fsSL -o voz.onnx.json "$base/$ruta.onnx.json"
+          sed -i 's/"PhonemeType\.ESPEAK"/"espeak"/' voz.onnx.json
+          python marketing/spot/narrar.py piper voz.onnx 2> err.txt || { tail -5 err.txt | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
+
+      - name: Mezcla final
+        if: env.skip != '1'
+        run: |
+          set -eu
+          mkdir -p out
+          # La música baja sola cuando habla la voz (sidechain), luego todo a -14 LUFS.
+          ffmpeg -loglevel error -y -i marketing/spot/visual.mp4 -i marketing/spot/fondo.flac -i voz.wav -filter_complex "
+            [2:a]aformat=channel_layouts=stereo,highpass=f=80,acompressor=threshold=-20dB:ratio=3:attack=5:release=120,volume=1.6,asplit=2[v1][v2];
+            [1:a][v1]sidechaincompress=threshold=0.03:ratio=8:attack=15:release=350[duck];
+            [duck][v2]amix=inputs=2:normalize=0,loudnorm=I=-14:TP=-1.2:LRA=9,aresample=48000[a]" \
+            -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart \
+            "out/Reset-Gym-spot-9x16-${{ matrix.voz }}.mp4"
+          ffprobe -v error -show_entries format=duration -of csv=p=0 out/*.mp4
+
+      - uses: actions/upload-artifact@v4
+        if: env.skip != '1'
+        with:
+          name: spot-${{ matrix.voz }}
+          path: out/*.mp4
+
+  publicar:
+    needs: spot
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Release "spot"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # versión sin voz (música + efectos), siempre
+          sudo apt-get install -y -qq ffmpeg >/dev/null
+          ffmpeg -loglevel error -y -i marketing/spot/visual.mp4 -i marketing/spot/fondo.flac -map 0:v -map 1:a -c:v copy \
+            -af "loudnorm=I=-14:TP=-1.2,aresample=48000" -c:a aac -b:a 192k -shortest -movflags +faststart out/Reset-Gym-spot-9x16-sin-voz.mp4
+          ls -la out
+          gh release delete spot --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create spot out/*.mp4 --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
+            --title "Reset Gym · spot 9:16" \
+            --notes "Spot vertical (1080×1920, 33 s) de Reset Gym: con voz de mujer, de hombre, con ElevenLabs (si está configurado) y sin voz."
