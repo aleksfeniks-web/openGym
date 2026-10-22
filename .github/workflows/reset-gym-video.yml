@@ -40,7 +40,8 @@ jobs:
           curl -fsSL -o voz.onnx.json "$base/${{ matrix.ruta }}.onnx.json"
 
       - name: Narrar
-        run: python marketing/video/voz.py voz.onnx audio
+        run: |
+          python marketing/video/voz.py voz.onnx audio 2> err.txt || { tail -6 err.txt | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
 
       - name: Video
         run: python marketing/video/render.py video.mp4 audio/duraciones.json
