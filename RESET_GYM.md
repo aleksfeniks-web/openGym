@@ -43,6 +43,32 @@ Lo hace GitHub Actions (`.github/workflows/reset-gym-apk.yml`):
    número. El workflow publica el Release con el APK y su `.sha256`, y la app lo ofrece en
    Ajustes → Buscar actualizaciones.
 
+## Servidor en Render (cuentas e inicio de sesión)
+
+Las cuentas viven en un servidor, no en la app: el repositorio es público y el APK se puede
+abrir, así que ninguna contraseña va en el código. El servidor es el mismo de openGym con
+inicio de sesión por usuario y contraseña, sin registro abierto y sin modo invitado.
+
+1. En [render.com](https://render.com): **New → Blueprint** → conecta GitHub y elige este
+   repositorio. Render lee `render.yaml` y crea el servicio **reset-gym** (plan Starter con un
+   disco de 1 GB en `/data`; el plan gratis no tiene disco y borraría todo en cada reinicio).
+2. Render pide el valor de **RESET_ACCOUNTS**. Es una lista JSON con las cuentas iniciales:
+
+   ```json
+   [{"name":"Jorge","password":"…"},{"name":"admin","password":"…","admin":true}]
+   ```
+
+   Se guarda como secreto en Render y no aparece en ningún otro lado. Cada cuenta se crea la
+   primera vez que arranca el servidor; si ya existe, no se toca (un cambio de contraseña hecho
+   después se respeta). Para agregar usuarios, súmalos a la lista y reinicia el servicio, o
+   créalos desde el panel de admin.
+3. Cuando el servicio esté arriba, copia su dirección (p. ej. `https://reset-gym.onrender.com`)
+   y guárdala en GitHub: *Settings → Secrets and variables → Actions → Variables* →
+   `RESET_SERVER_URL`. El siguiente APK abrirá directo en la pantalla de inicio de sesión.
+
+El workflow **Reset Gym servidor** compila y arranca la imagen de Render en cada cambio y prueba
+el inicio de sesión con cuentas de prueba.
+
 ## Licencias (importante)
 
 - **Código:** AGPL-3.0, igual que openGym. Si distribuyes el APK, el código fuente de esa versión

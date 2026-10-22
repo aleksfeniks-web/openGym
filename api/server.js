@@ -146,6 +146,8 @@ db.creds = db.creds || [];
 db.subs = db.subs || [];
 db.invites = db.invites || [];
 db.deviceLinks = db.deviceLinks || [];   // unused one-time device links, hashed (device-link.js)
+// The Capacitor WebView origins of the Android and iOS app.
+const APP_ORIGINS = new Set(['https://localhost', 'capacitor://localhost', 'http://localhost']);
 const isAdmin = user => !!user && (user.admin === true || ADMIN_UIDS.includes(user.id));
 // 0600: db.json holds passkey credential material. It used to be covered by a blanket 0700 on
 // the whole directory; now that the directory stays traversable, the file carries its own mode.
@@ -651,7 +653,9 @@ const clearCookie = COOKIE === LEGACY_COOKIE
 const CSRF_EXEMPT = new Set([
   'POST /api/register/options', 'POST /api/register/verify',
   'POST /api/login/options', 'POST /api/login/verify',
-  'POST /api/pair/redeem'
+  'POST /api/pair/redeem',
+  // Reset Gym: checks the app's Origin itself (passwordSignIn) and sets no cookie.
+  'POST /api/app/login/password'
 ]);
 const originsMatch = (a, b) => a.replace(/\/+$/, '') === b.replace(/\/+$/, '');
 function csrfOk(req, key) {
@@ -949,6 +953,7 @@ setInterval(() => { AUTH_BURST.sweep(); ADDR_FAILS.sweep(); ACCOUNT_FAILS.sweep(
 // budget; `null` spends only that.
 const THROTTLED = {
   'POST /api/login/password': 'password', 'POST /api/login/password-reset': 'password',
+  'POST /api/app/login/password': 'password',
   'POST /api/register/password': 'signup',
   'POST /api/account/password': 'password', 'DELETE /api/account/password': null,
   // Setting an e-mail only spends the budget and asks the address's e-mail pause; an address
@@ -1235,8 +1240,12 @@ async function removeEmail(req, res, user, body) {
   json(res, 200, { ok: true, email: null });
 }
 
-const passwordRoutes = {
-  'POST /api/login/password': async (req, res) => {
+// Reset Gym: the same password sign-in for the Android app, answered with a Bearer token the way
+// POST /api/pair/redeem answers (the app keeps no cookie). Only the app's own WebView origins may
+// call it: a web page cannot send one of those as its Origin, and since nothing is set in the
+// caller's browser, a forged request could not sign a visitor into anything anyway.
+const passwordSignIn = asApp => async (req, res) => {
+    if (asApp && !APP_ORIGINS.has(req.headers.origin)) return json(res, 403, { error: 'cross-origin request refused' });
     const body = await readBody(req);
     const target = loginTarget(body);
     const pw = typeof body.password === 'string' ? body.password : '';
@@ -1274,9 +1283,14 @@ const passwordRoutes = {
       // The same question again: the password may have changed while the new hash was made.
       if (!still()) return json(res, 401, WRONG);
     }
-    audit(req, 'auth.password.ok', { user });
+    audit(req, 'auth.password.ok', { user, msg: asApp ? 'app' : undefined });
+    if (asApp) return json(res, 200, { token: makeSession(user), user: publicUser(user) });
     json(res, 200, { user: publicUser(user) }, { 'Set-Cookie': sessionCookie(user) });
-  },
+};
+
+const passwordRoutes = {
+  'POST /api/login/password': passwordSignIn(false),
+  'POST /api/app/login/password': passwordSignIn(true),
 
   // For browsers that cannot make a passkey at all: plain http on a LAN address, some Firefox
   // setups. Same invite rules as /api/register/*, checked again and burned after the hash.
@@ -2620,9 +2634,6 @@ function bodyDeadline(req) {
   req.allowSlowBody = clear;
 }
 
-// The Capacitor WebView origins of the Android and iOS app.
-const APP_ORIGINS = new Set(['https://localhost', 'capacitor://localhost', 'http://localhost']);
-
 const server = http.createServer(async (req, res) => {
   bodyDeadline(req);
   // Same-origin (the deployed nginx-proxied web app) never triggers CORS, so this only matters
@@ -2706,4 +2717,39 @@ server.headersTimeout = 60000;
 // port that was actually bound: with PORT=0 the OS picks one, and a caller that did not choose it
 // (the tests spawn the server that way, and so does anyone running two instances on one box) has
 // no other way to learn it.
+/* ---------- Reset Gym: cuentas iniciales ----------
+   RESET_ACCOUNTS (variable de entorno, JSON): [{"name":"Jorge","password":"…"},{"name":"admin","password":"…","admin":true}]
+   Las contraseñas viven solo en el servidor (secreto de Render), nunca en el código ni en la app.
+   Una cuenta se crea si todavía no hay un perfil con contraseña con ese nombre; si ya existe no se
+   toca, así que una contraseña cambiada después no se pisa en el siguiente arranque. Se crea con
+   hashPassword directamente: la política de longitud (MIN_LENGTH) es para quien elige su propia
+   contraseña, no para las que pone el dueño del servidor. */
+async function seedResetAccounts() {
+  const raw = process.env.RESET_ACCOUNTS;
+  if (!raw) return;
+  let list;
+  try { list = JSON.parse(raw); } catch { console.error('RESET_ACCOUNTS no es JSON válido; no se crea ninguna cuenta'); return; }
+  if (!Array.isArray(list)) { console.error('RESET_ACCOUNTS tiene que ser una lista'); return; }
+  let made = 0;
+  for (const a of list) {
+    const name = typeof a?.name === 'string' ? a.name.trim().slice(0, 40) : '';
+    const pw = typeof a?.password === 'string' ? a.password : '';
+    if (!name || !pw) continue;
+    const k = nameKey(name);
+    const existing = db.users.find(u => nameKey(u.name) === k && hasPassword(u));
+    if (existing) {
+      // Ser admin sí se sigue de la variable: quitar "admin" ahí le quita el panel.
+      if (!!a.admin !== (existing.admin === true)) { existing.admin = !!a.admin || undefined; made++; }
+      continue;
+    }
+    const created = new Date().toISOString();
+    const user = { id: crypto.randomBytes(12).toString('base64url'), name, created, pw: { h: await hashPassword(pw), set: created }, ...(a.admin ? { admin: true } : {}) };
+    db.users.push(user);
+    made++;
+    console.log(`cuenta creada: ${name}${a.admin ? ' (admin)' : ''}`);
+  }
+  if (made) saveDb();
+}
+await seedResetAccounts();
+
 server.listen(PORT, () => console.log(`gym-api on :${server.address().port} (rpID=${RP_ID}, origin=${ORIGIN})`));

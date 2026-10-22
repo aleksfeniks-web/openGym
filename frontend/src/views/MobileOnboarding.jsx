@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { t } from '../lib/i18n.js'
-import { APP_NAME, BRAND_TAGLINE } from '../lib/brand.js'
+import { APP_NAME, BRAND_TAGLINE, RESET_SERVER } from '../lib/brand.js'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { askAddDeviceData } from '../sheets.jsx'
@@ -129,6 +129,7 @@ export default function MobileOnboarding() {
     <div className="brand-sub" style={{ marginBottom: 6 }}>{BRAND_TAGLINE}</div>
   </>
   const wrap = { display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '78vh', textAlign: 'center' }
+  if (RESET_SERVER) return <div className="narrow" style={wrap}>{head}<ResetLogin /></div>
   return (
     <div className="narrow" style={wrap}>
       {head}
@@ -143,4 +144,45 @@ export default function MobileOnboarding() {
       <Button icon="gear" onClick={() => openCfAccess()}>{t('Connection settings')}</Button>
     </div>
   )
+}
+
+// Reset Gym: inicio de sesión con usuario y contraseña contra el servidor de Reset Gym
+// (lib/brand.js RESET_SERVER). Las cuentas las crea el administrador; aquí no hay registro.
+function ResetLogin() {
+  const { signInToServer } = useStore()
+  const [name, setName] = useState('')
+  const [password, setPassword] = useState('')
+  const [show, setShow] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const go = async e => {
+    e?.preventDefault()
+    if (!name.trim() || !password) { setError('Escribe tu usuario y tu contraseña.'); return }
+    setBusy(true)
+    setError('')
+    try { await signInToServer(RESET_SERVER, name.trim(), password, askAddDeviceData) }
+    catch (err) { setError(err?.message || 'No se pudo iniciar sesión.') }
+    finally { setBusy(false) }
+  }
+  return <form onSubmit={go} style={{ textAlign: 'left', marginTop: 26 }} noValidate>
+    <label className="small muted" htmlFor="rg-user" style={{ display: 'block', margin: '0 2px 6px' }}>Usuario</label>
+    <input id="rg-user" className="input" value={name} onChange={e => setName(e.target.value)}
+      autoCapitalize="none" autoCorrect="off" autoComplete="username" spellCheck={false} />
+    <div style={{ height: 14 }} />
+    <label className="small muted" htmlFor="rg-pass" style={{ display: 'block', margin: '0 2px 6px' }}>Contraseña</label>
+    <div style={{ position: 'relative' }}>
+      <input id="rg-pass" className="input" type={show ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+        autoCapitalize="none" autoCorrect="off" autoComplete="current-password" spellCheck={false} style={{ paddingRight: 84 }} />
+      <button type="button" onClick={() => setShow(v => !v)} className="small"
+        style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 0, color: 'var(--acc)', padding: '6px 8px' }}>
+        {show ? 'Ocultar' : 'Mostrar'}
+      </button>
+    </div>
+    {error && <div className="small" role="alert" style={{ color: 'var(--red)', marginTop: 12, lineHeight: 1.45 }}>{error}</div>}
+    <div style={{ height: 20 }} />
+    <Button variant="primary" type="submit" disabled={busy}>{busy ? 'Entrando…' : 'Iniciar sesión'}</Button>
+    <div className="dim small" style={{ marginTop: 18, lineHeight: 1.5, textAlign: 'center' }}>
+      ¿No tienes cuenta? Pídela al administrador de tu gimnasio.
+    </div>
+  </form>
 }

@@ -71,6 +71,9 @@ jobs:
         env:
           # La app busca sus actualizaciones en este mismo repositorio (src/lib/brand.js).
           VITE_APP_REPO: ${{ github.repository }}
+          # El servidor de Reset Gym en Render (variable del repositorio RESET_SERVER_URL). Con ella
+          # la app abre en la pantalla de inicio de sesión; sin ella funciona como openGym.
+          VITE_RESET_SERVER: ${{ vars.RESET_SERVER_URL }}
         run: npm run build:mobile
 
       - name: Compilar el APK

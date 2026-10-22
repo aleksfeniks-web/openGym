@@ -1,0 +1,32 @@
+# Reset Gym en Render (Blueprint). Render → New → Blueprint → elige este repositorio.
+# Al crearlo, Render pide el valor de RESET_ACCOUNTS (las cuentas iniciales, ver RESET_GYM.md).
+services:
+  - type: web
+    name: reset-gym
+    runtime: docker
+    dockerfilePath: ./render/Dockerfile
+    dockerContext: .
+    # Starter: el plan gratis no tiene disco, y sin disco las cuentas y los entrenamientos se
+    # borran en cada reinicio o despliegue.
+    plan: starter
+    region: oregon
+    healthCheckPath: /api/health
+    autoDeploy: true
+    disk:
+      name: reset-gym-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: PASSWORD_LOGIN
+        value: "1"
+      - key: INVITE_ONLY
+        value: "1"
+      - key: ALLOW_GUEST
+        value: "0"
+      - key: DEFAULT_LANG
+        value: es
+      - key: AUDIT_IP
+        value: net
+      # Cuentas iniciales, en JSON. Secreta: se escribe en el panel de Render, nunca en el repo.
+      - key: RESET_ACCOUNTS
+        sync: false

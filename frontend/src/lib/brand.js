@@ -24,6 +24,12 @@ export const APP_REPO = TEST ? UPSTREAM_REPO : (import.meta.env?.VITE_APP_REPO |
 // ejercicio, instrucciones y descripción, en español). Se puede cambiar en Ajustes.
 export const BRAND_LANG = TEST ? null : 'es'
 
+// El servidor de Reset Gym (Render). Con él, la app de Android abre en una pantalla de inicio de
+// sesión con usuario y contraseña en lugar de preguntar si usarla solo en el teléfono. Lo pone el
+// workflow desde la variable del repositorio RESET_SERVER_URL; sin ella la app funciona como openGym.
+const cleanOrigin = raw => { try { return raw ? new URL(/^https?:\/\//i.test(raw) ? raw : 'https://' + raw).origin : '' } catch { return '' } }
+export const RESET_SERVER = TEST ? '' : cleanOrigin((import.meta.env?.VITE_RESET_SERVER || '').trim())
+
 export const SOURCE_URL = 'https://github.com/' + (APP_REPO || UPSTREAM_REPO)
 
 // "Documents/openGym" es una carpeta real del teléfono (la copia de seguridad automática la

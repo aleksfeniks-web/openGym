@@ -5,7 +5,7 @@ import { t } from '../lib/i18n.js'
 import { registerCustom, healCustomEx } from '../lib/exercises.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
 import { rememberDefaultLang } from '../lib/default-lang.js'
-import { BRAND_LANG } from '../lib/brand.js'
+import { BRAND_LANG, RESET_SERVER } from '../lib/brand.js'
 import { guestAllowed } from '../lib/guest.js'
 import { MOBILE, initReminderSync, nativeLoad, nativeSave, onAppActive, readJsonFile, syncReminder, writeAutoBackup, writeJsonFile } from '../lib/mobile.js'
 import { initHealthSync, syncHealth } from '../lib/health-sync.js'
@@ -20,7 +20,7 @@ import { countChanges, syncFingerprint } from '../lib/sync-changes.js'
 import { saveWorkoutEdit, deleteEditedWorkout } from '../lib/session-edit.js'
 import { appBase } from '../lib/app-base.js'
 import { linkTokenFromSearch, stripLinkFromUrl } from '../lib/device-link.js'
-import { loadRemote, chooseLocal, forgetRemote, connect, normalizeServerUrl, renewToken } from '../lib/remote.js'
+import { loadRemote, chooseLocal, forgetRemote, connect, connectPassword, normalizeServerUrl, renewToken } from '../lib/remote.js'
 import { loadCfAccess } from '../lib/cf-access.js'
 import { loadCoachDevice, saveCoachDevice, coachDeviceSettings } from '../lib/coach-device.js'
 import { RTL_LANGS } from '../lib/i18n-core.js'
@@ -1780,8 +1780,13 @@ export const useStore = create((set, get) => {
     // Redeems the pairing code shown in the browser (Settings → "Pair the mobile app") and
     // switches this device over to that account, same as signing in on the web does — the same
     // account pairing again merges what the phone kept (adoptProfile).
-    async connectToServer(url, code, ask) {
-      const user = await connect(url, code)   // throws on a bad URL/expired code — caller shows it
+    // Reset Gym: la pantalla de inicio de sesión (MobileOnboarding con RESET_SERVER). Mismo camino
+    // que connectToServer, con usuario y contraseña en lugar del código de emparejamiento.
+    async signInToServer(url, name, password, ask) {
+      return get().connectToServer(url, null, ask, { name, password })
+    },
+    async connectToServer(url, code, ask, login) {
+      const user = login ? await connectPassword(url, login.name, login.password) : await connect(url, code)   // throws on a bad URL/expired code — caller shows it
       // The account first, the address after: a copy another account still owed is kept aside
       // for it under the server it belongs to, not the one being paired.
       get().setUser(user, { adopt: true })
@@ -1803,7 +1808,8 @@ export const useStore = create((set, get) => {
       pairedBase = null
       setSync({ server: null })
       get().setGuest(true)
-      set({ ready: true })
+      // Reset Gym: sin sesión se vuelve a la pantalla de inicio de sesión.
+      set({ ready: true, ...(RESET_SERVER ? { needsMobileOnboarding: true } : {}) })
       return r
     },
 
@@ -1909,7 +1915,7 @@ export const useStore = create((set, get) => {
         // Only a genuinely first launch — nothing chosen yet and nothing to lose either — offers
         // the choice. Picking local (even with no data yet) persists that choice below and this
         // never asks again.
-        finishBoot({ needsMobileOnboarding: !remote && !hasData(get().S) })
+        finishBoot({ needsMobileOnboarding: !remote && (!!RESET_SERVER || !hasData(get().S)) })   // Reset Gym: siempre pide iniciar sesión
         return
       }
       // Demo build (GitHub Pages): no backend at all — seed once, stay in guest mode.

@@ -1,0 +1,39 @@
+# Reset Gym — comprueba que la imagen del servidor de Render compila y arranca, y que el inicio de
+# sesión con usuario y contraseña funciona (cuentas de prueba, no las reales).
+
+name: Reset Gym servidor
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['render/**', 'api/**', 'frontend/**', 'web/nginx.conf.template', 'render.yaml', '.github/workflows/reset-gym-server.yml']
+
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Compilar la imagen de Render
+        run: docker build -f render/Dockerfile -t reset-gym .
+
+      - name: Arrancar y probar el inicio de sesión
+        run: |
+          set -eu
+          docker run -d --name rg -p 10000:10000 -e PORT=10000 \
+            -e PASSWORD_LOGIN=1 -e INVITE_ONLY=1 -e ALLOW_GUEST=0 -e DEFAULT_LANG=es \
+            -e RESET_ACCOUNTS='[{"name":"prueba","password":"clave-de-prueba"},{"name":"jefe","password":"otra-clave","admin":true}]' \
+            reset-gym
+          for i in $(seq 1 30); do curl -fs localhost:10000/api/health >/dev/null && break; sleep 2; done
+          docker logs rg
+          curl -fs localhost:10000/ | grep -q "<title>Reset Gym</title>"
+          curl -fs -o /dev/null localhost:10000/api/health
+          H='Content-Type: application/json'
+          curl -fs -X POST localhost:10000/api/app/login/password -H "$H" -H 'Origin: https://localhost' \
+            -d '{"name":"jefe","password":"otra-clave"}' | grep -q '"admin":true'
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:10000/api/app/login/password -H "$H" -H 'Origin: https://localhost' \
+            -d '{"name":"prueba","password":"mal"}')
+          test "$code" = 401
+          echo "Servidor de Reset Gym: OK"

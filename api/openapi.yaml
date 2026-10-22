@@ -633,6 +633,55 @@ paths:
               schema: { $ref: '#/components/schemas/Error' }
               example: { error: "invalid or expired code", code: "pair-invalid" }
 
+  /api/app/login/password:
+    post:
+      tags: [password]
+      operationId: loginPasswordApp
+      summary: "Reset Gym: sign in from the Android app with a name and a password"
+      description: |
+        Same check, throttle and answers as `POST /api/login/password`, but for the mobile app:
+        it answers with a Bearer token (like `POST /api/pair/redeem`) and sets no cookie. Only
+        the app's own WebView origins (`https://localhost`, `capacitor://localhost`,
+        `http://localhost`) may call it; any other `Origin` gets `403`. CSRF-exempt for that
+        reason. Present only while PASSWORD_LOGIN is on.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                name: { type: string, description: A profile name or an e-mail address. }
+                password: { type: string, maxLength: 256 }
+      responses:
+        '200':
+          description: Signed in.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string, description: Signed session token, valid for SESSION_DAYS. }
+                  user: { $ref: '#/components/schemas/SessionUser' }
+        '400':
+          description: Name or password missing.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Wrong name or password.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Not called from the app, or the account is disabled.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '503': { $ref: '#/components/responses/Busy' }
   /api/login/password:
     post:
       tags: [password]
