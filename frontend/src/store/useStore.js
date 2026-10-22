@@ -86,7 +86,7 @@ const gainedWorkoutMedia = (prev, next) => {
   return workoutMediaHashes(next).some(h => !had.has(h))
 }
 export const DEF = {
-  unit: 'kg', restSec: 90, restPauseSec: 15, sound: true, soundOnSilent: false, vibrateOnSilent: false, timerFlash: false, timedSetOvertime: false, keepAwake: true, lang: 'en',
+  unit: 'kg', restSec: 90, restPauseSec: 15, sound: true, soundOnSilent: false, vibrateOnSilent: false, timerFlash: false, timedSetOvertime: false, keepAwake: true, lang: BRAND_LANG || 'en',   // Reset Gym: español (lib/brand.js)
   theme: 'dark', accent: 'lime', body: 'male', targetW: null,
   bodyweight: [], routines: [], week: {}, dayPlan: {},
   // A note per day off (#261): { [iso]: { tag, text, _ts } } (lib/day-notes.js). A noted day is
@@ -227,7 +227,7 @@ export const DEF = {
   // entirely by the original English name. Independent of enParens and keyed by the same base
   // language, so e.g. Italian can keep its parens while German pins names to English. Map
   // { '<lang>': boolean }; a missing key reads as off (translation shown as usual).
-  enOnly: {},
+  enOnly: BRAND_LANG ? { [BRAND_LANG]: true } : {},   // Reset Gym: nombres de ejercicios en inglés
   // What the line under an exercise holds today's rows against (#173, views/Workout.jsx): 'last'
   // is the last time in that routine, 'best' the best set of the exercise ever logged. Tapping
   // the line switches it. Absent reads as 'last', the line as it always was.
