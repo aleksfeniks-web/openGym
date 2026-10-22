@@ -31,6 +31,12 @@ jobs:
           curl -fs localhost:10000/ | grep -q "<title>Reset Gym</title>"
           curl -fs -o /dev/null localhost:10000/api/health
           curl -fsI localhost:10000/exercise-media/still/0001.webp | grep -qi 'content-type: image/webp'
+          # Otros sitios: bloqueados. La app (https://localhost): permitida, con CORS para fetch().
+          curl -fsI localhost:10000/exercise-media/still/0001.webp -H 'Referer: https://otro-sitio.example/' | grep -qi 'cross-origin-resource-policy: same-origin'
+          curl -fsI localhost:10000/exercise-media/still/0001.webp -H 'Referer: https://localhost/' | grep -qi 'cross-origin-resource-policy: cross-origin'
+          curl -fsI localhost:10000/exercise-media/clip/$(docker exec rg ls /usr/share/nginx/html/exercise-media/clip | head -1) -H 'Origin: https://localhost' > /tmp/h
+          grep -qi 'cross-origin-resource-policy: cross-origin' /tmp/h
+          grep -qi 'access-control-allow-origin: https://localhost' /tmp/h
           H='Content-Type: application/json'
           curl -fs -X POST localhost:10000/api/app/login/password -H "$H" -H 'Origin: https://localhost' \
             -d '{"name":"jefe","password":"otra-clave"}' | grep -q '"admin":true'

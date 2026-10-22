@@ -17,6 +17,25 @@ NGINX_PORT="$PUBLIC_PORT" BACKEND=127.0.0.1 PORT="$API_PORT" RESOLVER=1.1.1.1 \
 CF_CONNECTING_IP="" BASE_PATH="" MEDIA_UPLOAD_MAX=48m \
   envsubst '${NGINX_PORT} ${BACKEND} ${PORT} ${RESOLVER} ${CF_CONNECTING_IP} ${BASE_PATH} ${MEDIA_UPLOAD_MAX}' \
   < /etc/nginx/reset-gym.conf.template > /etc/nginx/http.d/default.conf
+# Las animaciones de ejercicios llevan Cross-Origin-Resource-Policy: same-origin para que otros
+# sitios no las usen. La app de Android corre en https://localhost (su WebView) y quedaba fuera,
+# así que aquí se deja pasar solo a la app: por su Origin (fetch) o su Referer (<img>, <video>).
+# Cualquier otro sitio sigue recibiendo same-origin, y el CORS solo se abre para la app.
+cat > /etc/nginx/http.d/00-reset-gym-maps.conf <<'MAPS'
+map $http_origin $rg_acao {
+    default "";
+    "https://localhost" $http_origin;
+    "capacitor://localhost" $http_origin;
+    "http://localhost" $http_origin;
+}
+map "$http_referer|$http_origin" $rg_corp {
+    default "same-origin";
+    "~^(https|capacitor|http)://localhost(/[^|]*)?\|" "cross-origin";
+    "~\|(https|capacitor|http)://localhost$" "cross-origin";
+}
+MAPS
+sed -i 's#add_header Cross-Origin-Resource-Policy "same-origin" always;#add_header Cross-Origin-Resource-Policy $rg_corp always; add_header Access-Control-Allow-Origin $rg_acao always; add_header Vary "Origin, Referer" always;#' \
+  /etc/nginx/http.d/default.conf
 mkdir -p /run/nginx
 nginx -t
 
