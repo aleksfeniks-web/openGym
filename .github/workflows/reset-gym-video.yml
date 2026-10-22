@@ -1,0 +1,80 @@
+# Reset Gym — arma el video vertical (9:16) con voz en español y lo publica en el Release "video".
+# Corre a mano (Actions → Reset Gym video → Run workflow) o al cambiar marketing/video/.
+
+name: Reset Gym video
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['marketing/video/**', '.github/workflows/reset-gym-video.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  video:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Voces de Piper en español de México (rhasspy/piper-voices).
+          - voz: hombre
+            ruta: es/es_MX/ald/medium/es_MX-ald-medium
+          - voz: mujer
+            ruta: es/es_MX/claude/high/es_MX-claude-high
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Herramientas
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core >/dev/null
+          pip install -q pillow piper-tts==1.8.0
+
+      - name: Bajar la voz
+        run: |
+          base=https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0
+          curl -fsSL -o voz.onnx "$base/${{ matrix.ruta }}.onnx"
+          curl -fsSL -o voz.onnx.json "$base/${{ matrix.ruta }}.onnx.json"
+
+      - name: Narrar
+        run: python marketing/video/voz.py voz.onnx audio
+
+      - name: Video
+        run: python marketing/video/render.py video.mp4 audio/duraciones.json
+
+      - name: Unir voz y video
+        run: |
+          python marketing/video/voz.py --mezcla audio video.timing.json voz.wav
+          mkdir -p out
+          ffmpeg -loglevel error -y -i video.mp4 -i voz.wav -map 0:v -map 1:a -c:v copy \
+            -af "loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000" -c:a aac -b:a 160k -shortest \
+            -movflags +faststart "out/Reset-Gym-9x16-voz-${{ matrix.voz }}.mp4"
+          ffprobe -v error -show_entries format=duration -of csv=p=0 out/*.mp4
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ matrix.voz }}
+          path: out/*.mp4
+
+  publicar:
+    needs: video
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Release "video"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la out
+          test -n "$(ls out/*.mp4 2>/dev/null)"
+          gh release delete video --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create video out/*.mp4 --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
+            --title "Reset Gym · video 9:16" \
+            --notes "Video vertical (1080×1920) de Reset Gym con narración en español. Versiones con voz de hombre y de mujer."
