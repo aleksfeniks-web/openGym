@@ -130,3 +130,16 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --title "Reset Gym $GITHUB_REF_NAME" \
             --notes "Reset Gym para Android, de Reset Supply. Basado en openGym (AGPL-3.0); el código fuente de esta versión está en este repositorio."
+
+      # Sin etiqueta: el APK de prueba también va a un Release "prueba" (pre-release), que se
+      # descarga fácil desde el celular. La app no lo ofrece como actualización: busca solo el
+      # último Release que no es pre-release.
+      - name: Publicar el APK de prueba
+        if: github.ref_type != 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete prueba --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create prueba out/* --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
+            --title "Reset Gym (prueba)" \
+            --notes "Última compilación de prueba de Reset Gym para Android ($(echo $GITHUB_SHA | cut -c1-7)). Descarga el archivo .apk de abajo e instálalo en el teléfono."
