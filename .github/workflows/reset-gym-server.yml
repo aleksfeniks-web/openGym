@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['render/**', 'api/**', 'frontend/**', 'web/nginx.conf.template', 'render.yaml', '.github/workflows/reset-gym-server.yml']
+    paths: ['render/**', 'catalogue/media/**', 'api/**', 'frontend/**', 'web/nginx.conf.template', 'render.yaml', '.github/workflows/reset-gym-server.yml']
 
 jobs:
   image:
@@ -30,6 +30,7 @@ jobs:
           docker logs rg
           curl -fs localhost:10000/ | grep -q "<title>Reset Gym</title>"
           curl -fs -o /dev/null localhost:10000/api/health
+          curl -fsI localhost:10000/exercise-media/still/0001.webp | grep -qi 'content-type: image/webp'
           H='Content-Type: application/json'
           curl -fs -X POST localhost:10000/api/app/login/password -H "$H" -H 'Origin: https://localhost' \
             -d '{"name":"jefe","password":"otra-clave"}' | grep -q '"admin":true'

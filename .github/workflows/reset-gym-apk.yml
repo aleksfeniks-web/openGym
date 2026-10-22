@@ -74,7 +74,15 @@ jobs:
           # El servidor de Reset Gym en Render (variable del repositorio RESET_SERVER_URL). Con ella
           # la app abre en la pantalla de inicio de sesión; sin ella funciona como openGym.
           VITE_RESET_SERVER: ${{ vars.RESET_SERVER_URL || 'https://reset-gym.onrender.com' }}
-        run: npm run build:mobile
+        # Las animaciones de ejercicios (unos 217 MB) no van dentro del APK: la app las toma del
+        # servidor de Reset Gym, que ya las sirve en /exercise-media/. Así el APK pesa decenas de MB.
+        run: |
+          set -eu
+          export VITE_IMG_BASE="${VITE_RESET_SERVER%/}/exercise-media/still/"
+          export VITE_GIF_BASE="${VITE_RESET_SERVER%/}/exercise-media/clip/"
+          VITE_MOBILE=1 npx vite build
+          npx cap sync android
+          node scripts/check-mobile-bundle.mjs
 
       - name: Compilar el APK
         working-directory: frontend/android
