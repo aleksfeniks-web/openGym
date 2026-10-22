@@ -61,7 +61,7 @@ inicio de sesión por usuario y contraseña, sin registro abierto y sin modo inv
    Se guarda como secreto en Render y no aparece en ningún otro lado. Cada cuenta se crea la
    primera vez que arranca el servidor; si ya existe, no se toca (un cambio de contraseña hecho
    después se respeta). Para agregar usuarios, súmalos a la lista y reinicia el servicio, o
-   créalos desde el panel de admin.
+   genera un código de invitación en el panel de admin para que la persona cree su cuenta.
 3. Cuando el servicio esté arriba, copia su dirección (p. ej. `https://reset-gym.onrender.com`)
    y guárdala en GitHub: *Settings → Secrets and variables → Actions → Variables* →
    `RESET_SERVER_URL`. El siguiente APK abrirá directo en la pantalla de inicio de sesión.
