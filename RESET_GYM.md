@@ -12,7 +12,7 @@ el ID de la app, los colores, el ícono y el idioma por defecto.
 | ID de Android | `ch.duartesantos.opengym` | `mx.resetsupply.resetgym` |
 | Fondo | `#0c0e12` | negro de marca `#0a0a0a` |
 | Acento | verde iOS `#30d158` | verde lima `#8ee000` (y cian `#1eb8f0` como opción "Azul") |
-| Ícono | mancuerna | gota con rayo en degradado cian → lima (**provisional**) |
+| Ícono | mancuerna | pesas con rayo en degradado cian → lima |
 | Idioma | el del teléfono | español, con nombres de ejercicios en inglés |
 | Actualizaciones | Releases de openGym | Releases de este repositorio |
 
