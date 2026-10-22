@@ -62,9 +62,9 @@ inicio de sesión por usuario y contraseña, sin registro abierto y sin modo inv
    primera vez que arranca el servidor; si ya existe, no se toca (un cambio de contraseña hecho
    después se respeta). Para agregar usuarios, súmalos a la lista y reinicia el servicio, o
    genera un código de invitación en el panel de admin para que la persona cree su cuenta.
-3. Cuando el servicio esté arriba, copia su dirección (p. ej. `https://reset-gym.onrender.com`)
-   y guárdala en GitHub: *Settings → Secrets and variables → Actions → Variables* →
-   `RESET_SERVER_URL`. El siguiente APK abrirá directo en la pantalla de inicio de sesión.
+3. La app usa `https://reset-gym.onrender.com`. Si el servidor cambia de dirección, guarda la
+   nueva en GitHub: *Settings → Secrets and variables → Actions → Variables* →
+   `RESET_SERVER_URL`, y vuelve a compilar el APK.
 
 El workflow **Reset Gym servidor** compila y arranca la imagen de Render en cada cambio y prueba
 el inicio de sesión con cuentas de prueba.
