@@ -3,6 +3,7 @@ import { useUI } from '../store/useUI.js'
 import { webauthnOK, passkeyLogin, passkeyRegister, passkeyError, bio } from '../lib/api.js'
 import { hasData } from '../store/useStore.js'
 import { t } from '../lib/i18n.js'
+import { APP_NAME, BRAND_TAGLINE } from '../lib/brand.js'
 import { DEMO, REPO } from '../lib/demo.js'
 import { guestAllowed } from '../lib/guest.js'
 import { useState, useRef, useEffect } from 'react'
@@ -76,8 +77,9 @@ export default function Login() {
     catch (e) { if (e.name !== 'NotAllowedError' && e.name !== 'AbortError') useUI.getState().toast(passkeyError(e, t('Sign-in failed'))) }
   }
   const head = <>
-    <div style={{ fontSize: 54, display: 'flex', justifyContent: 'center', color: 'var(--acc)' }}><Icon name="dumbbell" /></div>
-    <h1 style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-.028em', margin: '10px 0 4px' }}>openGym</h1>
+    <div style={{ display: 'flex', justifyContent: 'center' }}><img src="icon-180.png" alt="" width="84" height="84" style={{ borderRadius: 20 }} /></div>
+    <h1 className="brand-word" style={{ fontSize: 38, margin: '14px 0 2px' }}>{APP_NAME}</h1>
+    <div className="brand-sub" style={{ marginBottom: 6 }}>{BRAND_TAGLINE}</div>
   </>
   const wrap = { display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '78vh', textAlign: 'center' }
 

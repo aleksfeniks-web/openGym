@@ -5,6 +5,7 @@ import { t } from '../lib/i18n.js'
 import { registerCustom, healCustomEx } from '../lib/exercises.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
 import { rememberDefaultLang } from '../lib/default-lang.js'
+import { BRAND_LANG } from '../lib/brand.js'
 import { guestAllowed } from '../lib/guest.js'
 import { MOBILE, initReminderSync, nativeLoad, nativeSave, onAppActive, readJsonFile, syncReminder, writeAutoBackup, writeJsonFile } from '../lib/mobile.js'
 import { initHealthSync, syncHealth } from '../lib/health-sync.js'
@@ -258,8 +259,9 @@ const detectedLang = () => {
 // merged under a saved copy it would claim that every existing profile never chose.
 export function freshState() {
   const s = clone(DEF)
-  s.lang = detectedLang()
-  s.langAuto = true
+  s.lang = BRAND_LANG || detectedLang()
+  s.langAuto = !BRAND_LANG   // Reset Gym: español fijo, no lo cambia el idioma del navegador
+  if (BRAND_LANG) s.enOnly = { [BRAND_LANG]: true }   // nombres de ejercicios en inglés
   s.weighIn = false
   // Exercise animations: Small (v1.3.11), a thumbnail beside the exercise name that a tap opens,
   // so the first set is on screen without scrolling. DEF stays 'full' for a profile saved before.
@@ -282,7 +284,7 @@ function loadState() {
     if (raw) {
       const saved = JSON.parse(raw)
       const s = sanitizeAccent(Object.assign(clone(DEF), saved))
-      if (!saved.lang) s.lang = detectedLang()
+      if (!saved.lang) s.lang = BRAND_LANG || detectedLang()
       return s
     }
   } catch (e) { /* ignore */ }

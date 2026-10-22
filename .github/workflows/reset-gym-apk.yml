@@ -1,0 +1,123 @@
+# Reset Gym — compila el APK de Android en GitHub Actions.
+#
+# Cuándo corre:
+#   - a mano: pestaña Actions → "Reset Gym APK" → Run workflow
+#   - en cada push a main (el APK queda como artefacto del run, 30 días)
+#   - en cada etiqueta v* (p. ej. v1.4.1-reset.1): además publica un Release con el APK y su
+#     .sha256, que es lo que la app consulta en Ajustes → Buscar actualizaciones.
+#
+# Firma:
+#   Sin secretos se genera un APK firmado con la clave de depuración: se instala, pero cada
+#   máquina de CI tiene otra clave, así que no sirve para actualizar encima de una versión
+#   anterior. Para versiones de verdad crea una clave UNA vez y guárdala en Settings → Secrets
+#   and variables → Actions:
+#     RESET_KEYSTORE_B64       base64 del archivo .jks   (base64 -w0 reset-gym.jks)
+#     RESET_KEYSTORE_PASSWORD  contraseña del keystore y de la clave
+#     RESET_KEY_ALIAS          alias de la clave (p. ej. resetgym)
+#   GUARDA ESE KEYSTORE: si lo pierdes, ningún teléfono podrá actualizar Reset Gym.
+#
+# Los flujos de trabajo de openGym (imágenes Docker, espejo de GitLab, CLA, web) están en
+# .github/upstream-workflows/ y no corren en este fork.
+
+name: Reset Gym APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reset-gym-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Instalar dependencias
+        working-directory: frontend
+        run: npm ci
+
+      - name: Compilar la app web y sincronizar con Android
+        working-directory: frontend
+        env:
+          # La app busca sus actualizaciones en este mismo repositorio (src/lib/brand.js).
+          VITE_APP_REPO: ${{ github.repository }}
+        run: npm run build:mobile
+
+      - name: Compilar el APK
+        working-directory: frontend/android
+        env:
+          RESET_KEYSTORE_B64: ${{ secrets.RESET_KEYSTORE_B64 }}
+          RESET_KEYSTORE_PASSWORD: ${{ secrets.RESET_KEYSTORE_PASSWORD }}
+          RESET_KEY_ALIAS: ${{ secrets.RESET_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          VER="$(node -p "require('../package.json').version")"
+          # La app compara su versión (frontend/package.json) con la etiqueta del último Release,
+          # así que ambas tienen que coincidir: sube la versión en package.json y etiqueta vX.Y.Z.
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v$VER" ]; then
+            echo "::error::La etiqueta ${GITHUB_REF_NAME} no coincide con frontend/package.json (v$VER)."
+            exit 1
+          fi
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          OUT="$GITHUB_WORKSPACE/out/ResetGym-$VER.apk"
+          if [ -n "${RESET_KEYSTORE_B64:-}" ]; then
+            ./gradlew --no-daemon assembleRelease
+            BT="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+            echo "$RESET_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/reset.jks"
+            "$BT/zipalign" -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
+            "$BT/apksigner" sign --ks "$RUNNER_TEMP/reset.jks" \
+              --ks-pass env:RESET_KEYSTORE_PASSWORD --key-pass env:RESET_KEYSTORE_PASSWORD \
+              --ks-key-alias "$RESET_KEY_ALIAS" --out "$OUT" "$RUNNER_TEMP/aligned.apk"
+            "$BT/apksigner" verify --print-certs "$OUT"
+            rm -f "$RUNNER_TEMP/reset.jks"
+          else
+            if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+              echo "::error::Una versión (etiqueta) necesita la clave de firma: agrega RESET_KEYSTORE_B64, RESET_KEYSTORE_PASSWORD y RESET_KEY_ALIAS en los secretos del repositorio."
+              exit 1
+            fi
+            echo "::warning::Sin clave de firma: se genera un APK de prueba (Reset Gym Test) firmado con la clave de depuración."
+            ./gradlew --no-daemon assembleDebug
+            OUT="$GITHUB_WORKSPACE/out/ResetGym-$VER-test.apk"
+            cp app/build/outputs/apk/debug/app-debug.apk "$OUT"
+          fi
+          (cd "$GITHUB_WORKSPACE/out" && for f in *.apk; do sha256sum "$f" > "$f.sha256"; cat "$f.sha256"; done)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reset-gym-apk
+          path: out/*
+          retention-days: 30
+
+      - name: Publicar la versión
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" out/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Reset Gym $GITHUB_REF_NAME" \
+            --notes "Reset Gym para Android, de Reset Supply. Basado en openGym (AGPL-3.0); el código fuente de esta versión está en este repositorio."

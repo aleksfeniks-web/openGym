@@ -181,7 +181,8 @@ describe('CSS for the own colour', () => {
 
 describe('the native countdown colours', () => {
   it('takes a preset key or the own colour', () => {
-    expect(accentPair('sky')).toEqual({ accent: ACCENTS.sky, ink: '#ffffff' })
+    // Reset Gym: el cian de marca lleva texto negro (el blanco no llega al contraste mínimo)
+    expect(accentPair('sky')).toEqual({ accent: ACCENTS.sky, ink: '#000000' })
     expect(accentPair('#ffd60a')).toEqual({ accent: '#ffd60a', ink: '#000000' })
     expect(accentPair('nonsense')).toEqual({ accent: ACCENTS.lime, ink: '#000000' })
     expect(accentPair(undefined)).toEqual({ accent: ACCENTS.lime, ink: '#000000' })

@@ -10,10 +10,13 @@
 // against its SHA-256 by the native Install plugin and handed to the system installer.
 
 import { MOBILE } from './mobile.js'
+import { APP_REPO } from './brand.js'
 
-const REPO = 'DuarteSantos8/openGym'
-const LATEST_URL = `https://api.github.com/repos/${REPO}/releases/latest`
-export const RELEASES_PAGE = `https://github.com/${REPO}/releases/latest`
+// Reset Gym busca sus actualizaciones en su propio fork (lib/brand.js), nunca en openGym: un APK
+// de openGym tiene otro applicationId y otra firma, y no puede instalarse encima de Reset Gym.
+const REPO = APP_REPO
+const LATEST_URL = REPO ? `https://api.github.com/repos/${REPO}/releases/latest` : null
+export const RELEASES_PAGE = REPO ? `https://github.com/${REPO}/releases/latest` : null
 
 /**
  * Compares two semver strings (e.g. "1.2.11" vs "1.3.0").
@@ -55,6 +58,7 @@ export async function checkForUpdate() {
   return cached
 }
 async function fetchLatest() {
+  if (!LATEST_URL) return { hasUpdate: false, latestVersion: __APP_VERSION__, apkUrl: null, hashUrl: null }
   const res = await fetch(LATEST_URL, { headers: { Accept: 'application/vnd.github+json' } })
   // 404: the repository has no published release yet
   if (res.status === 404) return { hasUpdate: false, latestVersion: __APP_VERSION__, apkUrl: null, hashUrl: null }
