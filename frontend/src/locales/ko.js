@@ -2244,4 +2244,7 @@ export default {
   'Your sports watch, calling you back.': '스포츠 시계가 다시 부르고 있어요.',
   'Coach wants you back on the bar.': '코치가 바 앞으로 돌아오래요.',
   'Gentle, for headphones or a quiet room.': '이어폰이나 조용한 곳에 어울려요.',
+  'Install {0}': '{0} 설치',
+  'Install': '설치',
+  'Open it from your home screen, full screen like an app.': '홈 화면에서 앱처럼 전체 화면으로 여세요.',
 }

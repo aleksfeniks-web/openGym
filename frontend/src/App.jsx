@@ -20,6 +20,7 @@ import { MOBILE } from './lib/mobile.js'
 import { exitWorkoutEdit, startFlow } from './sheets.jsx'
 import Icon from './components/Icon.jsx'
 import TabBar from './components/TabBar.jsx'
+import InstallBanner from './components/InstallBanner.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Modals from './components/Modals.jsx'
 import Toast from './components/Toast.jsx'
@@ -237,6 +238,8 @@ function Shell() {
           would ride along with the page for the length of it. Decides for itself when to show —
           including on the sign-in screen, when the server has just ended the session. */}
       <SyncBanner />
+      {/* Invitación a instalar la app web (con la marca del gimnasio). No durante un entrenamiento. */}
+      {!loc.pathname.startsWith('/workout') && <InstallBanner />}
       {!noTabs && <TabBar onStart={startFlow} />}
       <RestTimer />
       <Modals />

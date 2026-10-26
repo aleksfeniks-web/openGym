@@ -6,10 +6,29 @@
 //
 // Basado en openGym de Duarte Santos (https://github.com/DuarteSantos8/openGym), AGPL-3.0.
 
-export const APP_NAME = 'Reset Gym'
+// Marca blanca: el servidor de cada gimnasio escribe window.__GYM__ en index.html al arrancar
+// (render/brand.mjs) con el nombre, el logo y el color que Reset Supply le configuró. Sin eso
+// (la app de Android, el servidor propio de Reset Gym, las pruebas) todo queda como Reset Gym.
+const readGym = () => {
+  try {
+    const g = typeof window !== 'undefined' ? window.__GYM__ : null
+    if (!g || typeof g !== 'object') return null
+    const name = typeof g.name === 'string' && g.name.trim() ? g.name.trim().slice(0, 45) : null
+    const logo = typeof g.logo === 'string' && /^gym-logo-[a-f0-9]{10}\.png$/.test(g.logo) ? g.logo : null
+    return name || logo ? { name, logo } : null
+  } catch { return null }
+}
+
+export const PLATFORM_NAME = 'Reset Gym'
 export const BRAND = 'Reset Supply'
-export const BRAND_TAGLINE = 'Professional ★ Gym Care'
 export const BRAND_SITE = 'resetsupplymx.com'
+/** La marca del gimnasio de este servidor, o null si es Reset Gym tal cual. */
+export const GYM = import.meta.env?.MODE === 'test' ? null : readGym()
+export const APP_NAME = GYM?.name || PLATFORM_NAME
+/** Logo que se muestra en el inicio de sesión y en el aviso de instalar. */
+export const APP_LOGO = GYM?.logo || 'icon-180.png'
+/** Bajo el logo: el lema de Reset Supply, o "con tecnología de Reset Gym" en un gimnasio con marca propia. */
+export const BRAND_TAGLINE = GYM ? `con tecnología de ${PLATFORM_NAME}` : 'Professional ★ Gym Care'
 
 // El repositorio de GitHub de este fork, "usuario/repo". Lo pone el workflow de GitHub Actions
 // al compilar (VITE_APP_REPO = github.repository). Sin él no se buscan actualizaciones, así que

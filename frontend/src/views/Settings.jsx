@@ -32,7 +32,7 @@ import { limitsFrom, fmtMB, MB } from '../lib/media-limits.js'
 import { setRestAccent } from '../lib/rest-alert.js'
 import { CUSTOM, accentKey, adjustedIn, applyAccent, cleanHex, inkOn, isGrey } from '../lib/accent.js'
 import { checkForUpdate, downloadAndInstall, fetchChecksum, RELEASES_PAGE } from '../lib/update.js'
-import { APP_NAME, APP_REPO, BRAND, BRAND_SITE, SOURCE_URL, UPSTREAM_REPO } from '../lib/brand.js'
+import { APP_NAME, APP_REPO, BRAND, BRAND_SITE, GYM, PLATFORM_NAME, SOURCE_URL, UPSTREAM_REPO } from '../lib/brand.js'
 // Dónde se descarga el APK de Reset Gym: los Releases del propio fork (lib/brand.js).
 const APK_PAGE = APP_REPO ? `https://github.com/${APP_REPO}/releases/latest` : null
 import { forgetCoach } from '../lib/coach-api.js'
@@ -833,7 +833,7 @@ export default function Settings({ page = null, find = null, via = null }) {
           build there is no address bar and no about box, so without this there is no way to tell
           which build you are running, or whether an update actually installed. */}
       <div className="dim small sp-version">
-        {APP_NAME} v{__APP_VERSION__} · {BRAND} · {BRAND_SITE}<br />
+        {APP_NAME} v{__APP_VERSION__} · {GYM ? `con tecnología de ${PLATFORM_NAME}` : BRAND} · {BRAND_SITE}<br />
         {t('free & open source (AGPL v3)')} · <a href={SOURCE_URL} target="_blank" rel="noopener">{t('Source code')}</a><br />
         {/* AGPL: la app es un fork de openGym; el aviso de autoría original se conserva. */}
         Basado en <a href={'https://github.com/' + UPSTREAM_REPO} target="_blank" rel="noopener">openGym</a> de Duarte Santos.<br />

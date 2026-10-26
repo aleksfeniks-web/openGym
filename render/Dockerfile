@@ -21,6 +21,7 @@ COPY web/nginx.conf.template /etc/nginx/reset-gym.conf.template
 COPY --from=build /app/frontend/dist /usr/share/nginx/html
 # Animaciones de ejercicios (180 px, Gym visual, ver NOTICE.md): van dentro de la imagen.
 COPY catalogue/media/ /usr/share/nginx/html/exercise-media/
+COPY render/brand.mjs /app/render-brand.mjs
 COPY --chmod=755 render/start.sh /start.sh
 ENV NODE_ENV=production
 CMD ["/start.sh"]

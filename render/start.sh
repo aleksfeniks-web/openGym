@@ -7,7 +7,8 @@ mkdir -p "$DATA_DIR"
 # Render pone la URL pública del servicio; las passkeys y las cookies se atan a ella.
 export ORIGIN="${ORIGIN:-${RENDER_EXTERNAL_URL:-http://localhost:${PORT:-10000}}}"
 export RP_ID="${RP_ID:-${RENDER_EXTERNAL_HOSTNAME:-localhost}}"
-export RP_NAME="${RP_NAME:-Reset Gym}"
+# El nombre que muestran las passkeys: el del gimnasio, si el servidor tiene marca propia.
+export RP_NAME="${RP_NAME:-${GYM_NAME:-Reset Gym}}"
 export TRUST_PROXY="${TRUST_PROXY:-1}"
 
 PUBLIC_PORT="${PORT:-10000}"
@@ -36,6 +37,9 @@ map "$http_referer|$http_origin" $rg_corp {
 MAPS
 sed -i 's#add_header Cross-Origin-Resource-Policy "same-origin" always;#add_header Cross-Origin-Resource-Policy $rg_corp always; add_header Access-Control-Allow-Origin $rg_acao always; add_header Vary "Origin, Referer" always;#' \
   /etc/nginx/http.d/default.conf
+# Marca del gimnasio (nombre, logo, color) en la app web, si este servidor la tiene (RESET_GYM.md).
+HTML_DIR=/usr/share/nginx/html node /app/render-brand.mjs || echo "Marca: no se pudo aplicar, se queda Reset Gym"
+
 mkdir -p /run/nginx
 nginx -t
 

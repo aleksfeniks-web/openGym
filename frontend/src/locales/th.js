@@ -2255,4 +2255,7 @@ export default {
   'Your sports watch, calling you back.': 'นาฬิกาสปอร์ตเรียกคุณกลับมาแล้ว',
   'Coach wants you back on the bar.': 'โค้ชอยากให้คุณกลับมาที่บาร์',
   'Gentle, for headphones or a quiet room.': 'เบา ๆ สำหรับหูฟังหรือห้องที่เงียบ',
+  'Install {0}': 'ติดตั้ง {0}',
+  'Install': 'ติดตั้ง',
+  'Open it from your home screen, full screen like an app.': 'เปิดจากหน้าจอหลัก แบบเต็มจอเหมือนแอป',
 }

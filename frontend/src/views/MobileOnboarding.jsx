@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { t } from '../lib/i18n.js'
-import { APP_NAME, BRAND_TAGLINE, RESET_SERVER } from '../lib/brand.js'
+import { APP_LOGO, APP_NAME, BRAND_TAGLINE, RESET_SERVER } from '../lib/brand.js'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { askAddDeviceData } from '../sheets.jsx'
@@ -124,7 +124,7 @@ export function ConnectSheet({ close, initialUrl = '', again = false }) {
 export default function MobileOnboarding() {
   const { chooseLocalMode } = useStore()
   const head = <>
-    <div style={{ display: 'flex', justifyContent: 'center' }}><img src="icon-180.png" alt="" width="84" height="84" style={{ borderRadius: 20 }} /></div>
+    <div style={{ display: 'flex', justifyContent: 'center' }}><img src={APP_LOGO} alt="" width="84" height="84" style={{ borderRadius: 20, objectFit: 'contain' }} /></div>
     <h1 className="brand-word" style={{ fontSize: 38, margin: '14px 0 2px' }}>{APP_NAME}</h1>
     <div className="brand-sub" style={{ marginBottom: 6 }}>{BRAND_TAGLINE}</div>
   </>

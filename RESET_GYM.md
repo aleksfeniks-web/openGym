@@ -79,3 +79,42 @@ el inicio de sesión con cuentas de prueba.
   usa con fines comerciales (por ejemplo, para promocionar Reset Supply), hace falta una licencia
   propia de [gymvisual.com](https://gymvisual.com/).
 - **Marca:** "openGym" es el nombre del proyecto original; Reset Gym no lo usa como nombre propio.
+
+## Marca de cada gimnasio (marca blanca)
+
+Cada gimnasio que contrata Reset Gym tiene **su propio servidor en Render**, con sus cuentas y sus
+datos separados de los demás. Reset Supply le pone el nombre, el logo y el color del gimnasio con
+cuatro variables; al arrancar, el servidor los aplica a la app web (`render/brand.mjs`):
+
+| Variable | Qué es | Ejemplo |
+|---|---|---|
+| `GYM_NAME` | Nombre del gimnasio: título, pantalla de inicio de sesión, nombre al instalar la app | `Gym Titán` |
+| `GYM_SHORT_NAME` | Nombre bajo el ícono del teléfono (12 caracteres o menos). Opcional | `Titán` |
+| `GYM_LOGO_URL` | Enlace **https** a un **PNG cuadrado**, mínimo 192 px (ideal 512 px o más, fondo sólido) | `https://…/logo.png` |
+| `GYM_COLOR` | Color de botones y acentos, en hex. Opcional | `#ff6a00` |
+
+Con la marca puesta, la persona que abre la página del gimnasio ve su logo y su nombre, y al
+instalar la app en el teléfono queda con el ícono y el nombre del gimnasio. La app muestra
+"con tecnología de Reset Gym" bajo el nombre. Sin estas variables todo se queda como Reset Gym.
+
+**Alta de un gimnasio nuevo:**
+
+1. Render → **New → Blueprint** → este repositorio. Ponle al servicio un nombre del gimnasio
+   (por ejemplo `gym-titan`).
+2. Llena `RESET_ACCOUNTS` (cuentas iniciales del gimnasio) y las cuatro variables de marca.
+3. Opcional: en el servicio, **Settings → Custom Domains**, agrega el dominio del gimnasio
+   (`app.gymtitan.mx`). Hazlo antes de que los socios creen sus passkeys: van atadas al dominio.
+4. En **Logs** debe aparecer `Marca: Gym Titán · logo 512×512 · color #ff6a00`. Si el logo no
+   sirve (no es PNG, no es cuadrado, es muy chico o el enlace no responde), el log dice por qué y la
+   app usa el ícono de Reset Gym; el servidor nunca se detiene por eso.
+
+Para **cambiar el logo**: cambia `GYM_LOGO_URL` y redespliega. Los teléfonos que ya instalaron la
+app actualizan el ícono por su cuenta (Android puede tardar unos días; en iPhone hay que reinstalar).
+
+**Invitación a instalar:** al abrir la página aparece una tarjeta "Instalar {gimnasio}". En Android y
+en la computadora (Chrome, Edge, Samsung Internet) abre el instalador del navegador; en iPhone
+explica *Compartir → Agregar a inicio*. "Más tarde" la oculta 30 días. No aparece si la app ya está
+instalada ni dentro del APK.
+
+**APK de Android:** su ícono y su nombre se fijan al compilar, así que el APK sigue siendo Reset Gym.
+Para un APK con la marca de un gimnasio hay que compilar una versión aparte con su propio ID.

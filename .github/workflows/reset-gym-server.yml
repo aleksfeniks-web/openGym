@@ -16,6 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Pruebas de la marca por gimnasio
+        run: node --test render/brand.test.mjs
+
       - name: Compilar la imagen de Render
         run: docker build -f render/Dockerfile -t reset-gym .
 
@@ -44,3 +47,21 @@ jobs:
             -d '{"name":"prueba","password":"mal"}')
           test "$code" = 401
           echo "Servidor de Reset Gym: OK"
+
+      - name: Arrancar con la marca de un gimnasio
+        run: |
+          set -eu
+          docker run -d --name gym -p 10001:10000 -e PORT=10000 -e PASSWORD_LOGIN=1 -e INVITE_ONLY=1 -e ALLOW_GUEST=0 \
+            -e GYM_NAME='Gym Titán' -e GYM_COLOR='#ff6a00' \
+            -e GYM_LOGO_URL="https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/frontend/public/icon-512.png" \
+            -e RESET_ACCOUNTS='[{"name":"prueba","password":"clave-de-prueba"}]' \
+            reset-gym
+          for i in $(seq 1 30); do curl -fs localhost:10001/api/health >/dev/null && break; sleep 2; done
+          docker logs gym | grep 'Marca: Gym Titán'
+          curl -fs localhost:10001/ | grep -q '<title>Gym Titán</title>'
+          curl -fs localhost:10001/ | grep -q 'window.__GYM__'
+          curl -fs localhost:10001/manifest.json | grep -q '"name": "Gym Titán"'
+          logo=$(curl -fs localhost:10001/manifest.json | grep -o 'gym-logo-[a-f0-9]*\.png' | head -1)
+          test -n "$logo"
+          curl -fsI "localhost:10001/$logo" | grep -qi 'content-type: image/png'
+          echo "Marca por gimnasio: OK"

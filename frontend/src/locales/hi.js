@@ -2244,4 +2244,7 @@ export default {
   'Your sports watch, calling you back.': 'आपकी स्पोर्ट्स घड़ी आपको वापस बुला रही है।',
   'Coach wants you back on the bar.': 'कोच आपको बार पर वापस चाहते हैं।',
   'Gentle, for headphones or a quiet room.': 'धीमी, हेडफ़ोन या शांत कमरे के लिए।',
+  'Install {0}': '{0} इंस्टॉल करें',
+  'Install': 'इंस्टॉल करें',
+  'Open it from your home screen, full screen like an app.': 'इसे होम स्क्रीन से खोलें, ऐप की तरह फ़ुल स्क्रीन में।',
 }

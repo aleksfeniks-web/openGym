@@ -2244,4 +2244,7 @@ export default {
   'Your sports watch, calling you back.': '你的运动手表在叫你回来。',
   'Coach wants you back on the bar.': '教练等你回到杠铃前。',
   'Gentle, for headphones or a quiet room.': '轻柔，适合耳机或安静的房间。',
+  'Install {0}': '安装 {0}',
+  'Install': '安装',
+  'Open it from your home screen, full screen like an app.': '从主屏幕打开，像应用一样全屏使用。',
 }

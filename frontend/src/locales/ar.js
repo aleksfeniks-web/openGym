@@ -2299,4 +2299,7 @@ export default {
   'Your sports watch, calling you back.': 'ساعتك الرياضية تناديك للعودة.',
   'Coach wants you back on the bar.': 'المدرب يريدك أن تعود إلى البار.',
   'Gentle, for headphones or a quiet room.': 'هادئ، للسماعات أو لغرفة هادئة.',
+  'Install {0}': 'تثبيت {0}',
+  'Install': 'تثبيت',
+  'Open it from your home screen, full screen like an app.': 'افتحه من شاشتك الرئيسية، بملء الشاشة مثل التطبيق.',
 }

@@ -2248,4 +2248,7 @@ export default {
   'Your sports watch, calling you back.': 'Ваши спортивные часы зовут вас обратно.',
   'Coach wants you back on the bar.': 'Тренер ждёт вас обратно у штанги.',
   'Gentle, for headphones or a quiet room.': 'Тихий, для наушников или спокойного зала.',
+  'Install {0}': 'Установить {0}',
+  'Install': 'Установить',
+  'Open it from your home screen, full screen like an app.': 'Открывайте с главного экрана — на весь экран, как приложение.',
 }

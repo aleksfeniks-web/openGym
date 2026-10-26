@@ -2244,4 +2244,7 @@ export default {
   'Your sports watch, calling you back.': 'Il tuo orologio sportivo ti richiama.',
   'Coach wants you back on the bar.': 'Il coach ti vuole di nuovo al bilanciere.',
   'Gentle, for headphones or a quiet room.': 'Delicato, per le cuffie o una stanza silenziosa.',
+  'Install {0}': 'Installa {0}',
+  'Install': 'Installa',
+  'Open it from your home screen, full screen like an app.': 'Aprila dalla schermata Home, a schermo intero come un’app.',
 }

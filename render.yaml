@@ -30,3 +30,12 @@ services:
       # Cuentas iniciales, en JSON. Secreta: se escribe en el panel de Render, nunca en el repo.
       - key: RESET_ACCOUNTS
         sync: false
+      # Marca del gimnasio (marca blanca, ver RESET_GYM.md). Vacías = Reset Gym tal cual.
+      - key: GYM_NAME
+        sync: false
+      - key: GYM_SHORT_NAME
+        sync: false
+      - key: GYM_LOGO_URL
+        sync: false
+      - key: GYM_COLOR
+        sync: false

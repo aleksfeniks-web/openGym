@@ -2244,4 +2244,7 @@ export default {
   'Your sports watch, calling you back.': 'Spor saatin seni geri çağırıyor.',
   'Coach wants you back on the bar.': 'Koç seni bara geri bekliyor.',
   'Gentle, for headphones or a quiet room.': 'Sakin, kulaklık ya da sessiz bir oda için.',
+  'Install {0}': '{0} uygulamasını yükle',
+  'Install': 'Yükle',
+  'Open it from your home screen, full screen like an app.': 'Ana ekranından aç, bir uygulama gibi tam ekran.',
 }

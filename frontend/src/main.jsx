@@ -6,6 +6,10 @@ import { useStore } from './store/useStore.js'
 import { startMediaSync } from './lib/media-sync.js'
 import { startNativeKeyboard } from './lib/native-keyboard.js'
 import './index.css'
+import { startInstallCapture } from './lib/install.js'
+
+// El aviso de "instalar app" de Chrome llega muy pronto: se guarda antes de pintar nada.
+if (!MOBILE) startInstallCapture(window)
 
 // App.jsx restores per-route scroll itself; the browser's own attempt races it.
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
